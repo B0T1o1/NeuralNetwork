@@ -1,6 +1,6 @@
 
 
-from math import e
+from math import e,log
 
 def tanh(z):
     return (e**z - e**-z)/(e**z + e**-z)
@@ -10,16 +10,15 @@ def tanh(z):
 class ActivationFunction:
     def __init__(self):
         pass
-    def Activation_function(self):
+    def Activation_function(self,z):
         raise NotImplementedError
-    def derivative_function(self):
+    def derivative_function(self,z):
         raise NotImplementedError
 
 
 
 class Tanhshrink(ActivationFunction):
     def __init__(self):
-        super().__init__()
         pass
 
     def Tanh_Shrink(self,z):
@@ -38,14 +37,13 @@ class Tanhshrink(ActivationFunction):
 
 class TanH(ActivationFunction):
     def __init__(self):
-        super().__init__()
         pass
-    def Activation_funcion(self,z):
+    def Activation_function(self,z):
         return tanh(z)
     def dxTanh(self,z):
         return 1 - tanh(z)**2
     def derivative_function(self,z):
-        return self.dxTanh(self,z)
+        return self.dxTanh(z)
 
     
 
@@ -53,21 +51,30 @@ class TanH(ActivationFunction):
 class CostFunction:
     def __init__(self):
         pass
-    def Cost_function(self):
+    def Cost_function(self,Predicted,Actual):
         raise NotImplementedError
-    def derivative_function(self):
+    def derivative_function(self,Predicted,Actual):
         raise NotImplementedError
 
-class MeanSqauredError(CostFunction):
+class MeanSquaredError(CostFunction):
     def __init__(self):
-        super().__init__()
+
         pass
     def Cost_function(self,Predicted,Actual):
         return (Predicted-Actual)**2
     def derivative_function(self,Predicted,Actual):
         return 2*(Predicted - Actual)
 
+class Sigmoid(CostFunction):
+    def __init__(self):
+        pass
+    def Cost_function(self, Predicted, Actual):
         
+        return Actual*log(Predicted) + (1-Actual) * log(1-Predicted)
+    
+    def derivative_function(self, Predicted, Actual):
+
+        return 
     
 
 class Node:
@@ -95,7 +102,7 @@ class Node:
             total = 0
             for index, x in enumerate(list_of_x):
                 total += self._weights[index] * x
-                total +=  self._biases
+                total += self._biases
             return total
         else:
             raise Exception('Number Of Arguments does not match expected Number of Inputs')
@@ -132,9 +139,9 @@ class NeuralNetwork:
                 layer_results = []
                 for node in self.__Layers[ilayer]:
 
-                    layer_results.append(node.Node_forward(*results))
+                    layer_results.append(node.Node_forward(results))
                 results = layer_results
-            return results[-1]
+            return results
         else: raise Exception('Number Of Arguments does not match expected Number of Inputs') 
 
     def trainINP(self,inputs,y,m):
@@ -147,9 +154,9 @@ class NeuralNetwork:
                         node._biases[iweight] = node._biases[iweight] - (self.__learningRate/m)*(self.__Cost_function.derivative_function(node.lasta , y) * self.__Activation_function.derivative_function(node.lastz))
             return
         if type(y) == list:
-            for iy in range(len(y)):
-                self.forward(inputs)
-            for i in range(len(self.__Layers),-1,-1):
+            
+            self.forward(inputs)
+            for i in range(len(self.__Layers)-1,-1,-1):
                 for node in self.__Layers[i]:
                     for iweight in range(len(node.last_list_of_x)):
                         node._weights[iweight] = node._weights[iweight] - (self.__learningRate/m)*( node.last_list_of_x[iweight] * self.__Cost_function.derivative_function(node.lasta , y[iy]) * self.__Activation_function.derivative_function(node.lastz))
@@ -163,6 +170,8 @@ class NeuralNetwork:
 
     def train(self,X,Y,epochs):
         for i in range(epochs):
+            if i % 1 ==0:
+                print(f'Epoch: {i}')
             self.trainStep(X,Y)
 
 
